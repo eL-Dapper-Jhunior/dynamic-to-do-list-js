@@ -5,10 +5,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskInput = document.getElementById('task-input');
     const taskList = document.getElementById('task-list');
 
+    // Load tasks from Local Storage
+    function loadTasks() {
+        const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        storedTasks.forEach(taskText => addTask(taskText, false));
+    }
+
     // Function to add a new task
-    function addTask() {
+    function addTask(taskText, save = true) {
         // Trim and validate input
-        const taskText = taskInput.value.trim();
+        taskText = typeof taskText === 'string' ? taskText.trim() : taskInput.value.trim();
 
         // Check if task is not empty
         if (taskText === "") {
@@ -27,7 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add remove functionality
         removeBtn.onclick = () => {
+            // Remove from DOM
             taskList.removeChild(li);
+
+            // Remove from Local Storage
+            const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+            const updatedTasks = storedTasks.filter(task => task !== taskText);
+            localStorage.setItem('tasks', JSON.stringify(updatedTasks));
         };
 
         // Append remove button to list item
@@ -36,8 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add list item to task list
         taskList.appendChild(li);
 
+        // Save to Local Storage if required
+        if (save) {
+            const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+            storedTasks.push(taskText);
+            localStorage.setItem('tasks', JSON.stringify(storedTasks));
+        }
+
         // Clear input field
-        taskInput.value = '';
+        if (taskInput) taskInput.value = '';
     }
 
     // Add task when button is clicked
@@ -49,4 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addTask();
         }
     });
+
+    // Load existing tasks
+    loadTasks();
 });
